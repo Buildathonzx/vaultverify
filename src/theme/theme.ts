@@ -1,6 +1,6 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme, ThemeOptions } from '@mui/material/styles';
 
-export const theme = createTheme({
+const themeOptions: ThemeOptions = {
   palette: {
     primary: {
       main: '#3f51b5',
@@ -61,4 +61,6 @@ export const theme = createTheme({
       },
     },
   },
-});
+};
+
+export const theme = createTheme(themeOptions);
