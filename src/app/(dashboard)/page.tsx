@@ -1,73 +1,196 @@
 import { useWallet } from '@/hooks/useWallet';
 import { NFTCard } from '@/components/NFTCard';
-import Link from 'next/link';
+import { 
+  Container, 
+  Grid, 
+  Card, 
+  CardContent, 
+  Typography, 
+  LinearProgress,
+  Box,
+  Button,
+  Stack,
+  Fade,
+  Paper
+} from '@mui/material';
+import { motion } from 'framer-motion';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import SecurityIcon from '@mui/icons-material/Security';
+
+const MotionPaper = motion(Paper);
 
 export default function Dashboard() {
   const { walletInfo } = useWallet();
 
   if (!walletInfo) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Connect Your Wallet</h2>
-          <p className="text-gray-600 mb-6">
-            Connect your wallet to view your NFT portfolio health and analytics
-          </p>
-        </div>
-      </div>
+      <Container>
+        <Box 
+          sx={{ 
+            minHeight: '80vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <Fade in>
+            <MotionPaper
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              elevation={2}
+              sx={{ p: 4, textAlign: 'center', maxWidth: 400 }}
+            >
+              <AccountBalanceWalletIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+              <Typography variant="h5" gutterBottom>
+                Connect Your Wallet
+              </Typography>
+              <Typography color="text.secondary" paragraph>
+                Connect your wallet to view your NFT portfolio health and analytics
+              </Typography>
+              <Button variant="contained" size="large">
+                Connect Wallet
+              </Button>
+            </MotionPaper>
+          </Fade>
+        </Box>
+      </Container>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Portfolio Overview</h1>
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-medium">Portfolio Health</h3>
-            <p className="text-3xl font-bold mt-2">
-              {walletInfo.portfolioHealth.overallScore}/100
-            </p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-medium">Total Value</h3>
-            <p className="text-3xl font-bold mt-2">
-              {walletInfo.portfolioHealth.totalValue.toFixed(2)} ETH
-            </p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-medium">Risk Distribution</h3>
-            <div className="mt-2 flex gap-2">
-              <div className="flex-1 bg-green-100 rounded p-2">
-                <p className="text-sm text-green-800">Low: {walletInfo.portfolioHealth.riskDistribution.low}%</p>
-              </div>
-              <div className="flex-1 bg-yellow-100 rounded p-2">
-                <p className="text-sm text-yellow-800">Medium: {walletInfo.portfolioHealth.riskDistribution.medium}%</p>
-              </div>
-              <div className="flex-1 bg-red-100 rounded p-2">
-                <p className="text-sm text-red-800">High: {walletInfo.portfolioHealth.riskDistribution.high}%</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Grid container spacing={3}>
+        {/* Portfolio Overview */}
+        <Grid item xs={12}>
+          <Typography variant="h4" gutterBottom>
+            Portfolio Overview
+          </Typography>
+        </Grid>
 
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">Top Performers</h2>
-          <Link 
-            href="/portfolio" 
-            className="text-indigo-600 hover:text-indigo-800"
+        {/* Stats Cards */}
+        <Grid item xs={12} md={4}>
+          <MotionPaper
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            elevation={1}
           >
-            View All
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {walletInfo.portfolioHealth.topPerformers.map((nft) => (
-            <NFTCard key={nft.id} nft={nft} />
-          ))}
-        </div>
-      </div>
-    </div>
+            <Card>
+              <CardContent>
+                <Stack direction="row" alignItems="center" spacing={2}>
+                  <SecurityIcon color="primary" />
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="overline">Portfolio Health</Typography>
+                    <Typography variant="h4">
+                      {walletInfo.portfolioHealth.overallScore}
+                    </Typography>
+                    <LinearProgress 
+                      variant="determinate" 
+                      value={walletInfo.portfolioHealth.overallScore}
+                      sx={{ mt: 1, mb: 0.5, height: 8, borderRadius: 4 }}
+                    />
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          </MotionPaper>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <MotionPaper
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            elevation={1}
+          >
+            <Card>
+              <CardContent>
+                <Stack direction="row" alignItems="center" spacing={2}>
+                  <TrendingUpIcon color="primary" />
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="overline">Total Value</Typography>
+                    <Typography variant="h4">
+                      {walletInfo.portfolioHealth.totalValue.toFixed(2)} ETH
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Across {walletInfo.nfts.length} NFTs
+                    </Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          </MotionPaper>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <MotionPaper
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            elevation={1}
+          >
+            <Card>
+              <CardContent>
+                <Typography variant="overline">Risk Distribution</Typography>
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="body2" gutterBottom>
+                    Low Risk
+                  </Typography>
+                  <LinearProgress 
+                    variant="determinate" 
+                    value={walletInfo.portfolioHealth.riskDistribution.low}
+                    color="success"
+                    sx={{ height: 8, borderRadius: 4, mb: 1 }}
+                  />
+                  <Typography variant="body2" gutterBottom>
+                    Medium Risk
+                  </Typography>
+                  <LinearProgress 
+                    variant="determinate" 
+                    value={walletInfo.portfolioHealth.riskDistribution.medium}
+                    color="warning"
+                    sx={{ height: 8, borderRadius: 4, mb: 1 }}
+                  />
+                  <Typography variant="body2" gutterBottom>
+                    High Risk
+                  </Typography>
+                  <LinearProgress 
+                    variant="determinate" 
+                    value={walletInfo.portfolioHealth.riskDistribution.high}
+                    color="error"
+                    sx={{ height: 8, borderRadius: 4 }}
+                  />
+                </Box>
+              </CardContent>
+            </Card>
+          </MotionPaper>
+        </Grid>
+
+        {/* Top Performers */}
+        <Grid item xs={12}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Typography variant="h5">Top Performers</Typography>
+            <Button variant="outlined" color="primary">
+              View All
+            </Button>
+          </Box>
+          <Grid container spacing={3}>
+            {walletInfo.portfolioHealth.topPerformers.map((nft, index) => (
+              <Grid item xs={12} sm={6} md={4} key={nft.id}>
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                >
+                  <NFTCard nft={nft} />
+                </motion.div>
+              </Grid>
+            ))}
+          </Grid>
+        </Grid>
+      </Grid>
+    </Container>
   );
 }

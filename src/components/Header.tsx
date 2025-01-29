@@ -1,79 +1,169 @@
-import Link from 'next/link';
+import { useState } from 'react';
+import {
+  AppBar,
+  Box,
+  Toolbar,
+  IconButton,
+  Typography,
+  Menu,
+  Container,
+  Avatar,
+  Tooltip,
+  MenuItem,
+  Button,
+  Stack,
+  Chip,
+  useMediaQuery
+} from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import MenuIcon from '@mui/icons-material/Menu';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { useWallet } from '../hooks/useWallet';
+import { formatAddress, formatEth } from '@/utils/formatters';
 
 export function Header() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { walletInfo, isConnecting, connect, disconnect } = useWallet();
+  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
-  const formatAddress = (address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElNav(event.currentTarget);
   };
+  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElUser(event.currentTarget);
+  };
+  const handleCloseNavMenu = () => setAnchorElNav(null);
+  const handleCloseUserMenu = () => setAnchorElUser(null);
 
   return (
-    <header className="bg-white shadow-sm">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <Link 
-              href="/"
-              className="flex items-center px-2 py-2 text-xl font-bold text-gray-900"
-            >
-              VaultVerify
-            </Link>
-            
-            {walletInfo && (
-              <div className="ml-6 flex space-x-4">
-                <Link
-                  href="/dashboard"
-                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/portfolio"
-                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
-                >
-                  Portfolio
-                </Link>
-                <Link
-                  href="/alerts"
-                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
-                >
-                  Alerts
-                </Link>
-              </div>
-            )}
-          </div>
+    <AppBar position="sticky" color="default" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+      <Container maxWidth="xl">
+        <Toolbar disableGutters>
+          {/* Logo - Desktop */}
+          <Typography
+            variant="h6"
+            noWrap
+            component="a"
+            href="/"
+            sx={{
+              mr: 2,
+              display: { xs: 'none', md: 'flex' },
+              fontWeight: 700,
+              color: 'inherit',
+              textDecoration: 'none',
+            }}
+          >
+            VaultVerify
+          </Typography>
 
-          <div className="flex items-center">
+          {/* Mobile Menu */}
+          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+            <IconButton
+              size="large"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleOpenNavMenu}
+              color="inherit"
+            >
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorElNav}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+              keepMounted
+              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+              open={Boolean(anchorElNav)}
+              onClose={handleCloseNavMenu}
+              sx={{ display: { xs: 'block', md: 'none' } }}
+            >
+              {['Dashboard', 'Portfolio', 'Alerts'].map((page) => (
+                <MenuItem key={page} onClick={handleCloseNavMenu}>
+                  <Typography textAlign="center">{page}</Typography>
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
+
+          {/* Logo - Mobile */}
+          <Typography
+            variant="h5"
+            noWrap
+            component="a"
+            href="/"
+            sx={{
+              mr: 2,
+              display: { xs: 'flex', md: 'none' },
+              flexGrow: 1,
+              fontWeight: 700,
+              color: 'inherit',
+              textDecoration: 'none',
+            }}
+          >
+            VaultVerify
+          </Typography>
+
+          {/* Desktop Navigation */}
+          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+            {['Dashboard', 'Portfolio', 'Alerts'].map((page) => (
+              <Button
+                key={page}
+                onClick={handleCloseNavMenu}
+                sx={{ my: 2, color: 'text.primary', display: 'block' }}
+              >
+                {page}
+              </Button>
+            ))}
+          </Box>
+
+          {/* Wallet Section */}
+          <Box sx={{ flexGrow: 0 }}>
             {walletInfo ? (
-              <div className="flex items-center space-x-4">
-                <div className="flex flex-col items-end">
-                  <span className="text-sm font-medium text-gray-900">
-                    {formatAddress(walletInfo.address)}
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {walletInfo.balance.toFixed(4)} ETH
-                  </span>
-                </div>
-                <button
-                  onClick={disconnect}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              <Stack direction="row" spacing={2} alignItems="center">
+                {!isMobile && (
+                  <Chip
+                    label={`${formatEth(walletInfo.balance)} ETH`}
+                    color="primary"
+                    variant="outlined"
+                  />
+                )}
+                <Tooltip title="Account settings">
+                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    <Avatar sx={{ bgcolor: 'primary.main' }}>
+                      {formatAddress(walletInfo.address).slice(0, 2)}
+                    </Avatar>
+                  </IconButton>
+                </Tooltip>
+                <Menu
+                  sx={{ mt: '45px' }}
+                  id="menu-appbar"
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  keepMounted
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseUserMenu}
                 >
-                  Disconnect
-                </button>
-              </div>
+                  <MenuItem onClick={disconnect}>
+                    <Typography textAlign="center">Disconnect</Typography>
+                  </MenuItem>
+                </Menu>
+              </Stack>
             ) : (
-              <button
+              <Button
+                variant="contained"
+                startIcon={<AccountBalanceWalletIcon />}
                 onClick={connect}
                 disabled={isConnecting}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 {isConnecting ? 'Connecting...' : 'Connect Wallet'}
-              </button>
+              </Button>
             )}
-          </div>
-        </div>
-      </nav>
-    </header>
+          </Box>
+        </Toolbar>
+      </Container>
+    </AppBar>
   );
 }

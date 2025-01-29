@@ -1,4 +1,7 @@
-import Image from 'next/image';
+import { useState } from 'react';
+import { Card, CardMedia, CardContent, Typography, Chip, Box, Stack, IconButton, Collapse } from '@mui/material';
+import { motion } from 'framer-motion';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { NFT, RiskFactor } from '../types';
 
 interface NFTCardProps {
@@ -6,71 +9,123 @@ interface NFTCardProps {
   onClick?: (nft: NFT) => void;
 }
 
+const MotionCard = motion(Card);
+
 export function NFTCard({ nft, onClick }: NFTCardProps) {
-  const getHealthScoreColor = (score: number) => {
-    if (score >= 80) return 'bg-green-100 text-green-800';
-    if (score >= 50) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-red-100 text-red-800';
+  const [expanded, setExpanded] = useState(false);
+
+  const getHealthColor = (score: number) => {
+    if (score >= 80) return 'success';
+    if (score >= 50) return 'warning';
+    return 'error';
   };
 
-  const getRiskBadgeColor = (severity: RiskFactor['severity']) => {
+  const getRiskSeverityColor = (severity: RiskFactor['severity']) => {
     switch (severity) {
-      case 'HIGH':
-        return 'bg-red-100 text-red-800';
-      case 'MEDIUM':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'LOW':
-        return 'bg-green-100 text-green-800';
+      case 'HIGH': return 'error';
+      case 'MEDIUM': return 'warning';
+      case 'LOW': return 'success';
     }
   };
 
   return (
-    <div 
-      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+    <MotionCard
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.2 }}
       onClick={() => onClick?.(nft)}
+      sx={{ 
+        cursor: 'pointer',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
     >
-      <div className="relative h-48 w-full">
-        <Image
-          src={nft.image}
+      <Box sx={{ position: 'relative', pt: '100%' }}>
+        <CardMedia
+          component="img"
+          image={nft.image}
           alt={nft.name}
-          fill
-          className="object-cover"
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            height: '100%',
+            width: '100%',
+            objectFit: 'cover'
+          }}
         />
-      </div>
-      
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <div>
-            <h3 className="font-semibold text-lg">{nft.name}</h3>
-            <p className="text-sm text-gray-600">{nft.collection}</p>
-          </div>
-          <span className={`px-2 py-1 rounded-full text-sm font-medium ${getHealthScoreColor(nft.healthScore)}`}>
-            {nft.healthScore}/100
-          </span>
-        </div>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            bgcolor: 'background.paper',
+            borderRadius: '16px',
+            px: 1,
+            py: 0.5,
+            boxShadow: 1
+          }}
+        >
+          <Chip
+            size="small"
+            label={`${nft.healthScore}/100`}
+            color={getHealthColor(nft.healthScore)}
+          />
+        </Box>
+      </Box>
 
-        <div className="mt-3">
-          <p className="text-sm font-medium text-gray-700">Current Value</p>
-          <p className="text-lg font-semibold">{nft.value.current} ETH</p>
-        </div>
+      <CardContent sx={{ flexGrow: 1 }}>
+        <Stack spacing={1}>
+          <Typography variant="h6" noWrap>{nft.name}</Typography>
+          <Typography variant="body2" color="text.secondary" noWrap>
+            {nft.collection}
+          </Typography>
+          
+          <Box sx={{ mt: 'auto' }}>
+            <Typography variant="subtitle2" color="text.secondary">
+              Current Value
+            </Typography>
+            <Typography variant="h6">
+              {nft.value.current} ETH
+            </Typography>
+          </Box>
 
-        {nft.riskFactors.length > 0 && (
-          <div className="mt-3">
-            <p className="text-sm font-medium text-gray-700 mb-1">Risk Factors</p>
-            <div className="flex flex-wrap gap-1">
-              {nft.riskFactors.map((risk, index) => (
-                <span
-                  key={index}
-                  className={`px-2 py-0.5 rounded-full text-xs ${getRiskBadgeColor(risk.severity)}`}
-                  title={risk.description}
+          {nft.riskFactors.length > 0 && (
+            <>
+              <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Risk Factors
+                </Typography>
+                <IconButton 
+                  size="small" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExpanded(!expanded);
+                  }}
+                  sx={{ ml: 'auto' }}
                 >
-                  {risk.type.replace('_', ' ')}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+                  <InfoOutlinedIcon />
+                </IconButton>
+              </Box>
+              
+              <Collapse in={expanded}>
+                <Stack spacing={0.5}>
+                  {nft.riskFactors.map((risk, index) => (
+                    <Chip
+                      key={index}
+                      size="small"
+                      label={risk.type.replace('_', ' ')}
+                      color={getRiskSeverityColor(risk.severity)}
+                      variant="outlined"
+                      sx={{ maxWidth: '100%' }}
+                    />
+                  ))}
+                </Stack>
+              </Collapse>
+            </>
+          )}
+        </Stack>
+      </CardContent>
+    </MotionCard>
   );
 }
