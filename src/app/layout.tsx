@@ -4,6 +4,7 @@ import './globals.css'
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { theme } from '@/theme/theme';
+import { useMemo } from 'react';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,10 +25,12 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const memoizedTheme = useMemo(() => theme, []);
+
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={memoizedTheme}>
           <CssBaseline />
           <div className="min-h-screen bg-gray-50">
             {children}

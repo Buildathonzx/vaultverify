@@ -1,8 +1,8 @@
-import { ethers } from 'ethers';
+import { ethers, Provider } from 'ethers';
 import { WalletInfo, NFT, PortfolioHealth } from '../types';
 
 export class WalletService {
-  private provider: ethers.providers.Web3Provider | null = null;
+  private provider: ethers.Provider.Web3Provider | null = null;
   private signer: ethers.Signer | null = null;
 
   async connectWallet(): Promise<WalletInfo> {
