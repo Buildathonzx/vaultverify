@@ -1,3 +1,5 @@
+'use client';
+
 import { Box, CircularProgress, Typography, useTheme } from '@mui/material';
 import { motion } from 'framer-motion';
 
